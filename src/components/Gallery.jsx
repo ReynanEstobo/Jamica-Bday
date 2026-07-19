@@ -37,19 +37,14 @@ export default function Gallery() {
     setActive((prev) => prev - 1);
   }
 
-  // Calculate real center position
   function updatePosition() {
     if (!cardRef.current || !containerRef.current) return;
 
     const cardWidth = cardRef.current.offsetWidth;
 
-    const gap = 20;
-
     const containerWidth = containerRef.current.offsetWidth;
 
-    const centerOffset = containerWidth / 2 - cardWidth / 2;
-
-    setOffset(centerOffset);
+    setOffset(containerWidth / 2 - cardWidth / 2);
   }
 
   useEffect(() => {
@@ -68,11 +63,11 @@ export default function Gallery() {
         setAnimate(false);
 
         setActive(start);
-      }, 700);
+      }, 900);
 
       setTimeout(() => {
         setAnimate(true);
-      }, 750);
+      }, 950);
     }
 
     if (active <= 0) {
@@ -80,11 +75,11 @@ export default function Gallery() {
         setAnimate(false);
 
         setActive(start);
-      }, 700);
+      }, 900);
 
       setTimeout(() => {
         setAnimate(true);
-      }, 750);
+      }, 950);
     }
   }, [active]);
 
@@ -163,7 +158,7 @@ export default function Gallery() {
 
           ${
             animate
-              ? "transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)]"
+              ? "transition-transform duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)]"
               : ""
           }
 
@@ -190,11 +185,9 @@ export default function Gallery() {
                 flex-none
 
 
-
                 w-[180px]
 
                 h-[250px]
-
 
 
                 sm:w-[260px]
@@ -212,23 +205,31 @@ export default function Gallery() {
                 border
 
 
+                cursor-pointer
+
+
 
                 transition-all
 
-                duration-700
+                duration-[900ms]
+
+                ease-[cubic-bezier(.22,1,.36,1)]
 
 
 
                 ${
                   distance === 0
                     ? `
-                  scale-110
+                  scale-105
 
                   opacity-100
 
-                  border-gold
 
-                  shadow-[0_25px_70px_rgba(212,175,55,.35)]
+                  border-gold/80
+
+
+                  shadow-[0_20px_50px_rgba(212,175,55,.25)]
+
 
                   z-20
                   `
@@ -236,20 +237,39 @@ export default function Gallery() {
                       ? `
                   scale-95
 
-                  opacity-70
+                  opacity-75
+
 
                   border-gold/40
 
+
                   z-10
                   `
-                      : `
+                      : distance === 2
+                        ? `
                   scale-90
 
-                  opacity-35
+                  opacity-50
 
-                  blur-[1px]
 
                   border-gold/20
+
+
+                  z-0
+                  `
+                        : `
+                  scale-85
+
+                  opacity-30
+
+
+                  blur-[2px]
+
+
+                  border-transparent
+
+
+                  z-0
                   `
                 }
 
@@ -257,7 +277,7 @@ export default function Gallery() {
               >
                 <img
                   src={img}
-                  alt="gallery"
+                  alt={`Gallery ${index + 1}`}
                   className="
                   w-full
 
@@ -275,9 +295,10 @@ export default function Gallery() {
 
                   inset-0
 
+
                   bg-gradient-to-t
 
-                  from-black/40
+                  from-black/30
 
                   via-transparent
 
@@ -306,23 +327,41 @@ export default function Gallery() {
         <button
           onClick={prev}
           className="
-          w-10 h-10
+          w-10
 
-          sm:w-12 sm:h-12
+          h-10
+
+
+          sm:w-12
+
+          sm:h-12
+
 
           rounded-full
+
 
           border
 
           border-gold/40
 
+
           bg-black/20
+
 
           backdrop-blur-xl
 
+
           text-gold-soft
 
+
           text-xl
+
+          transition-all
+
+          duration-300
+
+
+          hover:border-gold
           "
         >
           ‹
@@ -331,23 +370,41 @@ export default function Gallery() {
         <button
           onClick={next}
           className="
-          w-10 h-10
+          w-10
 
-          sm:w-12 sm:h-12
+          h-10
+
+
+          sm:w-12
+
+          sm:h-12
+
 
           rounded-full
+
 
           border
 
           border-gold/40
 
+
           bg-black/20
+
 
           backdrop-blur-xl
 
+
           text-gold-soft
 
+
           text-xl
+
+          transition-all
+
+          duration-300
+
+
+          hover:border-gold
           "
         >
           ›
