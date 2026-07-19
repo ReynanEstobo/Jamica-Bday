@@ -10,6 +10,7 @@ import ItemsSection from "./components/ItemsSection";
 import Timeline from "./components/Timeline";
 import Gallery from "./components/Gallery";
 import Footer from "./components/Footer";
+import BackToTop from "./components/BackToTop";
 
 const ROSE_MESSAGES = [
   "A rose symbolizes admiration and respect.",
@@ -168,6 +169,8 @@ export default function App() {
       <Timeline />
 
       <Gallery />
+
+      <BackToTop />
 
       <Footer />
     </>
