@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function EnvelopeIntro({ onOpened }) {
   const [opening, setOpening] = useState(false);
+  const [flapBehind, setFlapBehind] = useState(false);
   const [cardMoving, setCardMoving] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const timers = useRef([]);
 
   // Lock scrolling while envelope intro is active
   useEffect(() => {
@@ -18,6 +20,11 @@ export default function EnvelopeIntro({ onOpened }) {
       document.documentElement.style.overflow = "auto";
     };
   }, [hidden]);
+
+  useEffect(
+    () => () => timers.current.forEach((timer) => clearTimeout(timer)),
+    [],
+  );
 
   // Generate particles only once
   const particles = useMemo(
@@ -39,18 +46,23 @@ export default function EnvelopeIntro({ onOpened }) {
     // Start opening
     setOpening(true);
 
-    // Card starts moving sooner
-    setTimeout(() => {
+    // Change the flap's depth only after it passes the 90-degree midpoint.
+    timers.current.push(setTimeout(() => {
+      setFlapBehind(true);
+    }, 670));
+
+    // Let the flap finish and settle before the card begins to rise.
+    timers.current.push(setTimeout(() => {
       setCardMoving(true);
-    }, 700);
+    }, 1340));
 
     // Envelope transition
-    setTimeout(() => {
+    timers.current.push(setTimeout(() => {
       setLaunching(true);
-    }, 1800);
+    }, 2920));
 
     // Reveal website
-    setTimeout(() => {
+    timers.current.push(setTimeout(() => {
       setHidden(true);
 
       document.body.style.overflow = "auto";
@@ -62,7 +74,7 @@ export default function EnvelopeIntro({ onOpened }) {
       });
 
       onOpened?.();
-    }, 2700);
+    }, 3820));
   }
 
   return (
@@ -98,6 +110,141 @@ export default function EnvelopeIntro({ onOpened }) {
           }
         }
 
+        @keyframes envelopeRespond {
+          0% { transform: translate3d(0,0,0) rotate(0); }
+          7% { transform: translate3d(-3px,1px,0) rotate(-.35deg); }
+          14% { transform: translate3d(4px,-1px,0) rotate(.45deg); }
+          21% { transform: translate3d(-3px,0,0) rotate(-.3deg); }
+          28% { transform: translate3d(2px,-1px,0) rotate(.22deg); }
+          36% { transform: translate3d(-1px,0,0) rotate(-.1deg); }
+          48% { transform: translate3d(0,2px,0) rotate(0); }
+          72% { transform: translate3d(0,-1px,0) rotate(0); }
+          100% { transform: translate3d(0,0,0) rotate(0); }
+        }
+
+        @keyframes sealRelease {
+          0% { transform: translate(-50%,-50%) rotate(0) scale(1); opacity:1; }
+          32% { transform: translate(-50%,-44%) rotate(-3deg) scale(1.025); opacity:1; }
+          100% { transform: translate(-50%,-22%) rotate(7deg) scale(.78); opacity:0; }
+        }
+
+        @keyframes introDepart {
+          0% { transform: translateY(0) scale(1); opacity:1; filter:blur(0); }
+          100% { transform: translateY(-22px) scale(1.12); opacity:0; filter:blur(3px); }
+        }
+
+        @keyframes cardRise {
+          0% {
+            transform: translateY(30%) scale(1);
+            box-shadow: 0 8px 18px rgba(65,42,20,.2);
+            clip-path: inset(0 0 20% 0 round 10px);
+          }
+          24% {
+            clip-path: inset(0 0 0 0 round 10px);
+          }
+          100% {
+            transform: translateY(-85%) scale(1.018);
+            box-shadow: 0 24px 45px rgba(0,0,0,.3);
+            clip-path: inset(0 0 0 0 round 10px);
+          }
+        }
+
+        .envelope-opening { animation: envelopeRespond 1.15s cubic-bezier(.25,.7,.25,1); }
+        .seal-releasing { animation: sealRelease .55s cubic-bezier(.4,0,.7,.2) forwards; }
+        .intro-departing { animation: introDepart .9s cubic-bezier(.45,0,.2,1) forwards; }
+        .card-rising {
+          animation: cardRise 1.4s cubic-bezier(.2,.72,.22,1) forwards;
+          will-change: transform, box-shadow;
+        }
+        .envelope-stage {
+          --envelope-radius: clamp(10px, 3.4vw, 16px);
+          width: min(430px, 88vw, 74dvh);
+          min-width: 220px;
+          aspect-ratio: 1.55 / 1;
+          container-type: inline-size;
+          filter: drop-shadow(0 28px 26px rgba(0,0,0,.24));
+        }
+
+        .envelope-intro {
+          min-height: 100vh;
+          min-height: 100dvh;
+          padding: max(18px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+        }
+
+        .envelope-shell, .envelope-shell > .envelope-clip { border-radius: var(--envelope-radius); }
+
+        .envelope-flap {
+          inset-inline: 0;
+          width: 100%;
+          height: 55%;
+          transform-box: border-box;
+          transform-origin: 50% 0%;
+          clip-path: polygon(0 0, 100% 0, 50% 100%);
+          -webkit-clip-path: polygon(0 0, 100% 0, 50% 100%);
+          will-change: transform;
+        }
+
+        .envelope-pocket {
+          height: 62%;
+          border-radius: 0 0 var(--envelope-radius) var(--envelope-radius);
+          clip-path: polygon(0 0, 50% 35%, 100% 0, 100% 100%, 0 100%);
+          -webkit-clip-path: polygon(0 0, 50% 35%, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .invitation-card { border-radius: clamp(7px, 2.4cqw, 12px); }
+        .invitation-card h2 { font-size: clamp(1.35rem, 8.5cqw, 2.25rem); }
+        .invitation-card .card-kicker { font-size: clamp(7px, 2.35cqw, 10px); letter-spacing: clamp(.18rem, 1.25cqw, .38rem); }
+        .invitation-card .card-roman { font-size: clamp(9px, 2.8cqw, 12px); letter-spacing: clamp(.18rem, 1.1cqw, .32rem); }
+        .invitation-card .card-event { font-size: clamp(8px, 2.55cqw, 11px); letter-spacing: clamp(.12rem, .9cqw, .25rem); }
+
+        .paper-grain {
+          background-image:
+            linear-gradient(115deg, rgba(255,255,255,.22), transparent 38%),
+            repeating-linear-gradient(103deg, transparent 0 8px, rgba(118,82,30,.025) 9px, transparent 10px);
+          mix-blend-mode: soft-light;
+        }
+
+        .wax-seal {
+          box-shadow:
+            0 9px 18px rgba(44,5,14,.42),
+            0 2px 3px rgba(0,0,0,.28),
+            inset 3px 4px 7px rgba(255,167,176,.16),
+            inset -5px -6px 10px rgba(42,3,12,.34);
+        }
+
+        .intro-copy { margin-top: clamp(1.5rem, 4vh, 2.5rem); }
+
+        @media (max-width: 520px) {
+          .envelope-stage { width: min(90vw, 72dvh); min-width: 0; }
+          .intro-copy { width: 90vw; }
+          .intro-copy h3 { font-size: 1.8rem; }
+          .intro-copy p { font-size: 9px; letter-spacing: .2rem; line-height: 1.7; }
+          .wax-seal { width: 54px; height: 54px; }
+        }
+
+        @media (max-height: 620px) {
+          .envelope-stage { width: min(360px, 78vw, 58dvh); }
+          .intro-copy { margin-top: 1rem; }
+          .intro-copy h3 { font-size: 1.6rem; }
+          .intro-copy p { margin-top: .4rem; }
+        }
+
+        @media (max-height: 460px) and (orientation: landscape) {
+          .envelope-intro { flex-direction: row; gap: clamp(18px, 5vw, 54px); }
+          .envelope-stage { width: min(330px, 48vw, 72dvh); flex: 0 0 auto; }
+          .intro-copy { width: min(42vw, 360px); margin-top: 0; }
+        }
+
+        @media (max-width: 300px) {
+          .envelope-stage { width: 92vw; }
+          .intro-copy h3 { font-size: 1.5rem; }
+          .intro-copy p { letter-spacing: .12rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .envelope-opening, .seal-releasing, .intro-departing { animation-duration: 1ms; }
+        }
+
 
         .floating-particle{
           position:absolute;
@@ -117,7 +264,7 @@ export default function EnvelopeIntro({ onOpened }) {
         }
       `}</style>
       <div
-        className={`
+        className={`envelope-intro
         fixed
 
         inset-0
@@ -135,7 +282,7 @@ export default function EnvelopeIntro({ onOpened }) {
         overflow-hidden
 
 
-        bg-[radial-gradient(circle_at_top,#3a0c15_0%,#18070a_45%,#090505_100%)]
+        bg-[radial-gradient(ellipse_at_50%_36%,#4a111d_0%,#21090e_43%,#080405_100%)]
 
 
         transition-opacity
@@ -167,6 +314,8 @@ export default function EnvelopeIntro({ onOpened }) {
           blur-[150px]
           "
         />
+
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(0,0,0,.36)_100%)]" />
 
         {/* Floating Particles */}
 
@@ -216,23 +365,19 @@ export default function EnvelopeIntro({ onOpened }) {
         {/* Envelope */}
 
         <div
-          className={`
+          className={`envelope-stage
           relative
 
-          w-[min(400px,88vw)]
-
-          aspect-[1.55/1]
-
-          [perspective:1800px]
-
-
-          ${launching ? "animate-zoomAway" : ""}
+          ${opening ? "envelope-opening" : ""}
+          ${launching ? "intro-departing" : ""}
           `}
         >
+          <div className="absolute -bottom-[12%] left-[8%] h-[16%] w-[84%] rounded-full bg-black/45 blur-xl transition-all duration-1000" />
+
           {/* Envelope Base */}
 
           <div
-            className="
+            className={`envelope-shell
             absolute
 
             inset-0
@@ -256,29 +401,41 @@ export default function EnvelopeIntro({ onOpened }) {
 
             shadow-[0_35px_70px_rgba(0,0,0,.35)]
 
-            overflow-hidden
-            "
+            overflow-visible
+            `}
           >
+            <div className="envelope-clip absolute inset-0 overflow-hidden">
+              <div className="paper-grain absolute inset-0 opacity-70" />
+            </div>
+
+            {/* Interior lining visible when the flap opens */}
+            <div className="absolute inset-[2px] z-[2] overflow-hidden rounded-[15px] bg-gradient-to-b from-[#fffaf0] via-[#f1e4c8] to-[#dfc89b]">
+              <div className="absolute inset-0 opacity-25 bg-[repeating-linear-gradient(135deg,transparent_0px,transparent_9px,rgba(146,106,45,.12)_10px,transparent_11px)]" />
+              <div className="absolute inset-x-[6%] top-[7%] h-px bg-[#c8a85c]/25" />
+            </div>
             {/* Decorative Border */}
 
             <div
               className="
               absolute
 
-              inset-3
+              inset-[10px]
 
-              rounded-xl
+              rounded-[10px]
 
               border
 
-              border-gold/25
+              border-[#c6a552]/30
+
+              z-[3]
               "
             />
 
             {/* Invitation Card */}
 
+            <div className="absolute inset-0 z-[15] overflow-visible rounded-2xl">
             <div
-              className={`
+              className={`invitation-card
               absolute
 
 
@@ -293,10 +450,7 @@ export default function EnvelopeIntro({ onOpened }) {
               bottom-[8%]
 
 
-              z-[5]
-
-
-              rounded-xl
+              rounded-[9px]
 
 
               bg-gradient-to-b
@@ -308,11 +462,11 @@ export default function EnvelopeIntro({ onOpened }) {
 
               border
 
-              border-gold/25
+              border-[#c7a85d]/35
 
 
 
-              shadow-[0_20px_50px_rgba(0,0,0,.25)]
+              shadow-[0_8px_18px_rgba(65,42,20,.2)]
 
 
               flex
@@ -326,30 +480,30 @@ export default function EnvelopeIntro({ onOpened }) {
 
               text-center
 
+              overflow-hidden
 
-
-              transition-all
-
-
-              duration-[1100ms]
-
-
-              ease-[cubic-bezier(.18,.9,.28,1)]
 
 
               ${
                 cardMoving
-                  ? "-translate-y-[18%] scale-[1.02]"
-                  : "translate-y-[30%]"
+                  ? "card-rising"
+                  : "translate-y-[30%] [clip-path:inset(0_0_20%_0_round_10px)]"
               }
 
               `}
             >
+              <div className="pointer-events-none absolute inset-[7px] rounded-[7px] border border-[#c8a858]/30" />
+              <div className="paper-grain pointer-events-none absolute inset-0 opacity-40" />
+              <span className="pointer-events-none absolute left-3 top-3 h-3 w-3 border-l border-t border-[#c4a04b]/45" />
+              <span className="pointer-events-none absolute right-3 top-3 h-3 w-3 border-r border-t border-[#c4a04b]/45" />
+              <span className="pointer-events-none absolute bottom-3 left-3 h-3 w-3 border-b border-l border-[#c4a04b]/45" />
+              <span className="pointer-events-none absolute bottom-3 right-3 h-3 w-3 border-b border-r border-[#c4a04b]/45" />
+              <div className="pointer-events-none absolute left-1/2 top-4 h-px w-12 -translate-x-1/2 bg-gradient-to-r from-transparent via-[#c5a24a]/55 to-transparent" />
               <p
-                className="
+                className="card-kicker
                 uppercase
 
-                tracking-[0.45rem]
+                tracking-[0.38rem]
 
                 text-[10px]
 
@@ -375,11 +529,11 @@ export default function EnvelopeIntro({ onOpened }) {
                 className="
                 font-cinzel
 
-                text-[2.25rem]
+                text-[clamp(1.65rem,7vw,2.25rem)]
 
                 uppercase
 
-                tracking-[0.42rem]
+                tracking-[0.3rem]
 
                 text-[#73182b]
                 "
@@ -388,12 +542,12 @@ export default function EnvelopeIntro({ onOpened }) {
               </h2>
 
               <p
-                className="
+                className="card-roman
                 mt-2
 
                 uppercase
 
-                tracking-[0.4rem]
+                tracking-[0.32rem]
 
                 text-[12px]
 
@@ -416,10 +570,10 @@ export default function EnvelopeIntro({ onOpened }) {
               />
 
               <p
-                className="
+                className="card-event
                 uppercase
 
-                tracking-[0.32rem]
+                tracking-[0.25rem]
 
                 text-[11px]
 
@@ -429,11 +583,12 @@ export default function EnvelopeIntro({ onOpened }) {
                 Debut Celebration
               </p>
             </div>
+            </div>
 
             {/* Front Pocket */}
 
             <div
-              className="
+              className="envelope-pocket
               absolute
 
               bottom-0
@@ -444,13 +599,7 @@ export default function EnvelopeIntro({ onOpened }) {
               w-full
 
 
-              h-[55%]
-
-
-              z-10
-
-
-              rounded-b-2xl
+              z-20
 
 
               bg-gradient-to-b
@@ -462,12 +611,9 @@ export default function EnvelopeIntro({ onOpened }) {
               to-[#d8c096]
 
 
-              border-t
+              shadow-[inset_0_1px_0_rgba(255,255,255,.55)]
 
-              border-[#d5bb7a]
-
-
-              shadow-[inset_0_10px_15px_rgba(255,255,255,.2)]
+              [filter:drop-shadow(0_-1px_0_rgba(164,126,62,.28))]
               "
             >
               <div
@@ -483,24 +629,18 @@ export default function EnvelopeIntro({ onOpened }) {
                 bg-white/30
                 "
               />
+
+              <div className="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(115deg,transparent_0px,transparent_8px,rgba(255,255,255,.65)_9px,transparent_10px)]" />
             </div>
             {/* Flap */}
 
             <div
-              className={`
+              className={`envelope-flap
               absolute
 
               top-0
 
-              left-0
-
-
-              w-full
-
-              h-[60%]
-
-
-              z-20
+              ${flapBehind ? "z-[4]" : "z-20"}
 
 
               rounded-t-2xl
@@ -521,31 +661,31 @@ export default function EnvelopeIntro({ onOpened }) {
               shadow-[0_15px_30px_rgba(0,0,0,.18)]
 
 
-              [clip-path:polygon(0_0,100%_0,50%_100%)]
-
-
-              [transform-origin:top_center]
-
-
               transition-transform
 
 
               duration-[1000ms]
 
 
-              ease-[cubic-bezier(.22,1,.36,1)]
+              ease-[cubic-bezier(.45,.02,.2,1)]
+
+              ${opening ? "delay-[160ms]" : "delay-0"}
 
 
-              ${opening ? "[transform:rotateX(120deg)]" : ""}
+              ${opening ? "[transform:scaleY(-1)] shadow-[0_-8px_18px_rgba(50,25,12,.12)]" : "[transform:scaleY(1)]"}
 
               `}
-            />
+            >
+              <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,.34),transparent_42%,rgba(151,114,54,.08))]" />
+              <div className="absolute inset-x-[8%] top-2 h-px bg-white/35" />
+            </div>
 
             {/* Wax Seal */}
 
             <button
               onClick={handleOpen}
-              className={`
+              aria-label="Open invitation"
+              className={`wax-seal
               absolute
 
 
@@ -566,10 +706,10 @@ export default function EnvelopeIntro({ onOpened }) {
 
 
 
-              w-16
+              w-[62px]
 
 
-              h-16
+              h-[62px]
 
 
 
@@ -585,10 +725,6 @@ export default function EnvelopeIntro({ onOpened }) {
 
 
               bg-[radial-gradient(circle_at_30%_30%,#a32842,#6b1223)]
-
-
-
-              shadow-[0_10px_30px_rgba(0,0,0,.4)]
 
 
 
@@ -620,12 +756,13 @@ export default function EnvelopeIntro({ onOpened }) {
 
               ${
                 opening
-                  ? "scale-75 opacity-0 translate-y-2 pointer-events-none"
+                  ? "seal-releasing pointer-events-none"
                   : ""
               }
 
               `}
             >
+              <span className="absolute inset-[4px] rounded-full border border-[#efcf72]/35 shadow-[inset_0_2px_5px_rgba(255,255,255,.15),inset_0_-4px_8px_rgba(45,3,12,.3)]" />
               <span
                 className="
                 font-cinzel
@@ -644,8 +781,7 @@ export default function EnvelopeIntro({ onOpened }) {
         {/* Bottom Text */}
 
         <div
-          className={`
-          mt-10
+          className={`intro-copy
 
 
           text-center
@@ -661,7 +797,7 @@ export default function EnvelopeIntro({ onOpened }) {
 
 
 
-          ${launching ? "opacity-0 translate-y-5" : "opacity-100"}
+          ${cardMoving ? "opacity-0 translate-y-4" : "opacity-100"}
 
           `}
         >
