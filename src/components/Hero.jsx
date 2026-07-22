@@ -21,27 +21,27 @@ export default function Hero() {
       <div className="font-vibes text-[clamp(24px,4vw,38px)] text-gold-soft mt-2.5">
         Celebrating 18 Beautiful Years
       </div>
-      <div className="flex gap-4 mt-11 flex-wrap justify-center">
-        <div className="glass-card w-24 py-4.5 text-center">
-          <div className="font-cinzel text-[34px] text-gold-soft">{days}</div>
+      <div className="flex gap-2.5 mt-8 flex-wrap justify-center opacity-75">
+        <div className="w-[72px] py-2.5 text-center rounded-xl border border-white/10 bg-white/[0.025]">
+          <div className="font-cinzel text-[22px] text-beige">{days}</div>
           <div className="font-poppins text-[10px] tracking-[2px] uppercase opacity-70 mt-1">
             Days
           </div>
         </div>
-        <div className="glass-card w-24 py-4.5 text-center">
-          <div className="font-cinzel text-[34px] text-gold-soft">{hours}</div>
+        <div className="w-[72px] py-2.5 text-center rounded-xl border border-white/10 bg-white/[0.025]">
+          <div className="font-cinzel text-[22px] text-beige">{hours}</div>
           <div className="font-poppins text-[10px] tracking-[2px] uppercase opacity-70 mt-1">
             Hours
           </div>
         </div>
-        <div className="glass-card w-24 py-4.5 text-center">
-          <div className="font-cinzel text-[34px] text-gold-soft">{mins}</div>
+        <div className="w-[72px] py-2.5 text-center rounded-xl border border-white/10 bg-white/[0.025]">
+          <div className="font-cinzel text-[22px] text-beige">{mins}</div>
           <div className="font-poppins text-[10px] tracking-[2px] uppercase opacity-70 mt-1">
             Minutes
           </div>
         </div>
-        <div className="glass-card w-24 py-4.5 text-center">
-          <div className="font-cinzel text-[34px] text-gold-soft">{secs}</div>
+        <div className="w-[72px] py-2.5 text-center rounded-xl border border-white/10 bg-white/[0.025]">
+          <div className="font-cinzel text-[22px] text-beige">{secs}</div>
           <div className="font-poppins text-[10px] tracking-[2px] uppercase opacity-70 mt-1">
             Seconds
           </div>
